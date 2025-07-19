@@ -28,9 +28,29 @@ def convert_midi_to_audio(midi_path, soundfont_path, wav_path):
         midi_path
     ])
 
+def convert_wav_to_mp3(wav_path, mp3_path):
+    subprocess.run([
+        "ffmpeg",
+        "-i", wav_path,
+        "-codec:a", "libmp3lame",
+        "-qscale:a", "2",
+        mp3_path
+    ])
+
+midi_path = os.path.join(script_path, "outputs", "audio_basic_pitch.mid")
+wav_path = os.path.join(script_path, "final.wav")
 
 convert_midi_to_audio(
-    os.path.join(script_path, "outputs", "audio_basic_pitch.mid"),
+    midi_path,
     os.path.join(script_path, "soundfont", "flute4.sf2"),
-    os.path.join(script_path, "final.wav")
+    wav_path
 )
+
+os.remove(midi_path)
+
+mp3_path = os.path.join(script_path, "final.mp3")
+convert_wav_to_mp3(
+    wav_path,
+    mp3_path
+)
+os.remove(wav_path)
