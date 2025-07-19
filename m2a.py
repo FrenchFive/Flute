@@ -1,19 +1,20 @@
+import subprocess
 import os
-from midi2audio import FluidSynth
+import m2a
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 
-midi_path = os.path.join(script_path, "outputs", "audio_basic_pitch.mid")
 soundfont_path = os.path.join(script_path, "soundfont", "flute4.sf2")
-output_wav = os.path.join(script_path, "final.wav")
-output_mp3 = os.path.join(script_path, "final.mp3")
+midi_path = os.path.join(script_path, "outputs", "audio_basic_pitch.mid")
+wav_path = os.path.join(script_path, "outputs", "final.wav")
 
-# Initialize FluidSynth with your custom SoundFont
-fs = FluidSynth(sound_font=soundfont_path)
+subprocess.run([
+    "fluidsynth",
+    "-ni",
+    "-F", wav_path,
+    "-r", "44100",
+    soundfont_path,
+    midi_path
+])
 
-# Convert MIDI to WAV
-fs.midi_to_audio(midi_path, output_wav)
-
-# Convert WAV to MP3 (optional)
-os.system(f'ffmpeg -y -i "{output_wav}" "{output_mp3}"')
-os.remove(output_wav)
+m2a.convert_midi_to_audio(midi_path, soundfont_path, wav_path)
