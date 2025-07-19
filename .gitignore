@@ -215,3 +215,5 @@ __marimo__/
 !/outputs/.gitkeep
 
 ytb.txt
+/separated/*
+!/separated/.gitkeep

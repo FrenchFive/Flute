@@ -22,14 +22,17 @@ def clean_midi(midi_path):
     mid = mido.MidiFile(midi_path)
     for track in mid.tracks:
         for msg in track:
-            #remove if velocity is below 10
-            if msg.type == 'note_on' and msg.velocity < 5:
-                msg.velocity = 0
-            #remove if note is too low pitch
-            if msg.type == 'note_on' and msg.note < 10:
-                msg.velocity = 0
+            if msg.type == 'note_on':
+                #remove if velocity is below 10
+                if msg.velocity < 5:
+                    msg.velocity = 0
+                #remove if note is too low pitch
+                if msg.note < 10:
+                    msg.velocity = 0
+            
+                new_note = max(min(msg.note + 12, 127), 0)  # Transpose down by one octave
+                msg = msg.copy(note=new_note)
     mid.save(midi_path)
-
 
 def convert_midi_to_audio(midi_path, soundfont_path, wav_path):
     subprocess.run([
