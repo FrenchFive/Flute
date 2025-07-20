@@ -64,7 +64,7 @@ This will:
 ### 3. Generate Flute MIDI and MP3
 
 ```bash
-python flute.py
+python main.py
 ```
 
 This will:
@@ -77,9 +77,14 @@ This will:
 
 ---
 
+The process of seperating into different audio is long but gives better results as the pan flute cannot produce very deep sounds, nor can it produce drum sounds.
+<br> Therefore this part is in the `ytb.py` to be executed once, and `main.py` can be iterated on to get the perfect result.
+
+---
+
 ## 🔧 Customization
 
-* **Transposition**: Change `octave = 0` in `flute.py` to control pitch range.
+* **Transposition**: Change `octave = 0` in `main.py` to control pitch range.
 * **Soundfont**: Replace `Pan_Flute.sf2` in the `soundfont/` folder with your preferred `.sf2` file.
 
 ---
