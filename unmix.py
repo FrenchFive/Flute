@@ -1,14 +1,15 @@
 import os
 import torch
 import torchaudio
+import subprocess
 from demucs.apply import apply_model
 from demucs.pretrained import get_model
 from demucs.audio import AudioFile
-import subprocess
 
 def audio_split(input_audio_path: str, output_dir: str, model_name="htdemucs"):
     """
     Separates audio using Demucs and saves all stems as individual .mp3 files.
+    Ensures correct stem-to-source mapping using the model's metadata.
     """
     os.makedirs(output_dir, exist_ok=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -27,10 +28,16 @@ def audio_split(input_audio_path: str, output_dir: str, model_name="htdemucs"):
 
     print("Separating sources...")
     with torch.no_grad():
-        sources = apply_model(model, wav[None], device=device)[0]  # [4, T]
+        sources = apply_model(model, wav[None], device=device)[0]  # shape: [N, T]
+
+    # Get correct stem names from model
+    if hasattr(model, 'sources'):
+        stem_names = model.sources
+    else:
+        # Default fallback order
+        stem_names = ['vocals', 'drums', 'bass', 'other']
 
     # Save each stem as .wav and convert to .mp3
-    stem_names = ['vocals', 'drums', 'bass', 'other']
     for i, stem in enumerate(stem_names):
         wav_path = os.path.join(output_dir, f"{stem}.wav")
         mp3_path = os.path.join(output_dir, f"{stem}.mp3")
@@ -43,7 +50,8 @@ def audio_split(input_audio_path: str, output_dir: str, model_name="htdemucs"):
             "ffmpeg", "-y", "-i", wav_path, "-codec:a", "libmp3lame", "-qscale:a", "2", mp3_path
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        os.remove(wav_path)  # remove wav after conversion
+        os.remove(wav_path)  # Clean up
+
 
 
 def combine_stems(output_path: str, stem_dir: str,
@@ -84,7 +92,15 @@ def combine_stems(output_path: str, stem_dir: str,
 
     mix = sum(waveforms)
     torchaudio.save(output_path, mix, sample_rate)
-    print(f"Combined mix saved to: {output_path}")
+    
+
+    #convert to MP3
+    mp3_path = output_path.replace('.wav', '.mp3')
+    subprocess.run([
+        "ffmpeg", "-y", "-i", output_path, "-codec:a", "libmp3lame", "-qscale:a", "2", mp3_path
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print(f"Combined mix saved to: {mp3_path}")
+
 
 # Example usage
 if __name__ == "__main__":
