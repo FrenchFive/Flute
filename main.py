@@ -52,7 +52,7 @@ def convert_midi_to_audio(midi_path, soundfont_path, wav_path):
         "-ni",
         "-F", wav_path,
         "-r", "44100",
-        "-g", "4.0",
+        "-g", "2.0",
         soundfont_path,
         midi_path
     ])
